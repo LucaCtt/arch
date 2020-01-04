@@ -28,7 +28,7 @@ username="Luca Cotti"
 email="lucacotti@outlook.com"
 dotfiles_repo="https://github.com/LucaCtt/dotfiles"
 dotfiles_dir="$HOME/.dotfiles/"
-pkgs_basic="git gvim code kitty"
+pkgs_basic="git vim zsh"
 tmp="/tmp/bootstrap.$RANDOM.$RANDOM.$RANDOM.$$"
 installation_type="$1"
 
@@ -50,7 +50,7 @@ dot() {
 
 basic() {
     echo "Installing basic packages..."
-    sudo pacman -Syuq --needed "$pkgs_basic"
+    sudo pacman -Syuq --needed $pkgs_basic
 
     echo "Configuring git..."
     git config --global user.name "$username"
@@ -72,9 +72,9 @@ basic() {
     dot pull origin master
 }
 
-trap "cleanup; exit" EXIT INT TERM
 set -o errexit -o nounset -o noclobber -o pipefail
 shopt -s nullglob
+trap "cleanup; exit" EXIT INT TERM
 
 if [ "$EUID" -eq 0 ]
 then
