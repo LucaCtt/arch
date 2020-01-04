@@ -24,18 +24,18 @@
 # LICENSE
 #   MIT license.
 
-USERNAME='Luca Cotti'
-EMAIL='lucacotti@outlook.com'
-DOTFILES_REPO='https://github.com/LucaCtt/dotfiles'
-DOTFILES_DIR="$HOME/.dotfiles/"
-PKGS_BASIC='git gvim code kitty'
-TMP="/tmp/bootstrap.$RANDOM.$RANDOM.$RANDOM.$$"
+username="Luca Cotti"
+email="lucacotti@outlook.com"
+dotfiles_repo="https://github.com/LucaCtt/dotfiles"
+dotfiles_dir="$HOME/.dotfiles/"
+pkgs_basic="git gvim code kitty"
+tmp="/tmp/bootstrap.$RANDOM.$RANDOM.$RANDOM.$$"
+installation_type="$1"
 
 cleanup() {
-    echo "Cleaning up..."
-    if [ -d $TMP ]  
+    if [ -d $tmp ]  
     then
-        rm -r "$TMP"
+        rm -r "$tmp"
     fi
 }
 
@@ -45,29 +45,29 @@ err() {
 }
 
 dot() {
-    git --git-dir="$DOTFILES_DIR" --work-tree="$HOME" "$@" > /dev/null
+    git --git-dir="$dotfiles_dir" --work-tree="$HOME" "$@" > /dev/null
 }
 
 basic() {
-    echo 'Installing basic packages...'
-    sudo pacman -Syuq --needed "$PKGS_BASIC"
+    echo "Installing basic packages..."
+    sudo pacman -Syuq --needed "$pkgs_basic"
 
-    echo 'Configuring git...'
-    git config --global user.name "$USERNAME"
-    git config --global user.email "$EMAIL"
+    echo "Configuring git..."
+    git config --global user.name "$username"
+    git config --global user.email "$email"
 
-    echo 'Installing yay...'
-    cd "$TMP"
+    echo "Installing yay..."
+    cd "$tmp"
     git clone -q https://aur.archlinux.org/yay.git
     cd yay
     makepkg -si
     cd .. && rm -r yay
     cd "$HOME"
 
-    echo "Installing dotfiles from $DOTFILES_REPO..."
-    git init -q --bare $DOTFILES_DIR
+    echo "Installing dotfiles from $dotfiles_repo..."
+    git init -q --bare $dotfiles_dir
     dot config status.showUntrackedFiles no
-    dot remote add origin $DOTFILES_REPO
+    dot remote add origin $dotfiles_repo
     dot update-index --assume-unchanged README.md LICENSE
     dot pull origin master
 }
@@ -83,16 +83,14 @@ fi
 
 if [ ! -x "$(command -v sudo)" ]
 then
-    err 'Please install sudo before running this script. Do NOT run the script itself as root/sudo.'
+    err "Please install sudo before running this script. Do NOT run the script itself as root/sudo."
 fi
 
-(umask 077 && mkdir "$TMP") || {
+(umask 077 && mkdir "$tmp") || {
   err "Could not create temporary directory."
 }
 
-cd "$HOME"
-
-case "$1" in
+case "$installation_type" in
 "basic")
     basic
 ;;
