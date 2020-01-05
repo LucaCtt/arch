@@ -29,7 +29,7 @@ readonly email="lucacotti@outlook.com"
 readonly dotfiles_repo="https://github.com/LucaCtt/dotfiles"
 readonly dotfiles_dir="$HOME/.dotfiles/"
 readonly pkgs_basic=(git vim zsh)
-readonly tmp=$(mktemp -d -t "/tmp/bootstrap.XXXXXXXXXX")
+readonly tmp=$(mktemp -d -t -q "/tmp/bootstrap.XXXXXXXXXX")
 readonly installation_type="$1"
 
 cleanup() {
@@ -37,6 +37,10 @@ cleanup() {
     then
         rm -r "$tmp"
     fi
+}
+
+log() {
+    echo $1
 }
 
 err() {
@@ -50,21 +54,21 @@ dot() {
 
 basic() {
     local yay_dir="${tmp}/yay"
-    echo "Installing basic packages..."
-    sudo pacman -Syuq --needed "${pkgs_basic[@]}"
+    log "Installing basic packages..."
+    sudo pacman --sync --refresh --sysupgrade --quiet --noconfirm --needed "${pkgs_basic[@]}"
 
-    echo "Configuring git..."
+    log "Configuring git..."
     git config --global user.name "$username"
     git config --global user.email "$email"
 
-    echo "Installing yay..."
-    git clone -q https://aur.archlinux.org/yay.git "$yay_dir"
-    pushd "$yay_dir"
-    makepkg -si
-    popd
+    log "Installing yay..."
+    git clone --quiet https://aur.archlinux.org/yay.git "$yay_dir"
+    pushd "$yay_dir" > /dev/null
+    makepkg --syncdeps --install --needed --clean --noconfirm > /dev/null
+    popd > /dev/null
 
-    echo "Installing dotfiles from $dotfiles_repo..."
-    git init -q --bare "$dotfiles_dir"
+    log "Installing dotfiles from $dotfiles_repo..."
+    git init --quiet --bare "$dotfiles_dir"
     dot config status.showUntrackedFiles no
     dot remote add origin "$dotfiles_repo"
     dot update-index --assume-unchanged README.md LICENSE
@@ -87,7 +91,7 @@ fi
 
 if [ ! -d $tmp ]
 then
-  err "Could not create temporary directory."
+    err "Could not create temporary directory."
 fi
 
 case "$installation_type" in
