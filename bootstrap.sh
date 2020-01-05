@@ -24,13 +24,13 @@
 # LICENSE
 #   MIT license.
 
-username="Luca Cotti"
-email="lucacotti@outlook.com"
-dotfiles_repo="https://github.com/LucaCtt/dotfiles"
-dotfiles_dir="$HOME/.dotfiles/"
-pkgs_basic="git vim zsh"
-tmp="/tmp/bootstrap.$RANDOM.$RANDOM.$RANDOM.$$"
-installation_type="$1"
+readonly username="Luca Cotti"
+readonly email="lucacotti@outlook.com"
+readonly dotfiles_repo="https://github.com/LucaCtt/dotfiles"
+readonly dotfiles_dir="$HOME/.dotfiles/"
+readonly pkgs_basic=(git vim zsh)
+readonly tmp="/tmp/bootstrap.$RANDOM.$RANDOM.$RANDOM.$$"
+readonly installation_type="$1"
 
 cleanup() {
     if [ -d $tmp ]  
@@ -49,25 +49,24 @@ dot() {
 }
 
 basic() {
+    local yay_dir="${tmp}/yay"
     echo "Installing basic packages..."
-    sudo pacman -Syuq --needed $pkgs_basic
+    sudo pacman -Syuq --needed "${pkgs_basic[@]}"
 
     echo "Configuring git..."
     git config --global user.name "$username"
     git config --global user.email "$email"
 
     echo "Installing yay..."
-    cd "$tmp"
-    git clone -q https://aur.archlinux.org/yay.git
-    cd yay
+    git clone -q https://aur.archlinux.org/yay.git "$yay_dir"
+    pushd "$yay_dir"
     makepkg -si
-    cd .. && rm -r yay
-    cd "$HOME"
+    popd
 
     echo "Installing dotfiles from $dotfiles_repo..."
-    git init -q --bare $dotfiles_dir
+    git init -q --bare "$dotfiles_dir"
     dot config status.showUntrackedFiles no
-    dot remote add origin $dotfiles_repo
+    dot remote add origin "$dotfiles_repo"
     dot update-index --assume-unchanged README.md LICENSE
     dot pull origin master
 }
