@@ -27,10 +27,13 @@
 readonly username="Luca Cotti"
 readonly email="lucacotti@outlook.com"
 readonly dotfiles_repo="https://github.com/LucaCtt/dotfiles"
-readonly dotfiles_dir="$HOME/.dotfiles/"
+readonly dotfiles_dir="${HOME}/.dotfiles/"
 readonly pkgs_basic=(git vim zsh)
 readonly tmp=$(mktemp -d -t -q "bootstrap.XXXXXXXXXX")
 readonly installation_type="$1"
+
+readonly color_light_blue='\033[1;34m'
+readonly color_nc='\033[0m' 
 
 cleanup() {
     if [ -d $tmp ]  
@@ -40,7 +43,7 @@ cleanup() {
 }
 
 log() {
-    echo $1
+    echo -e "${color_light_blue}>${1}${color_nc}"
 }
 
 err() {
@@ -49,13 +52,13 @@ err() {
 }
 
 dot() {
-    git --git-dir="$dotfiles_dir" --work-tree="$HOME" "$@" > /dev/null
+    git --git-dir="$dotfiles_dir" --work-tree="$HOME" "$@"
 }
 
 basic() {
     local yay_dir="${tmp}/yay"
     log "Installing basic packages..."
-    sudo pacman --sync --refresh --sysupgrade --noconfirm --needed "${pkgs_basic[@]}" > /dev/null
+    sudo pacman -Syuq --noconfirm --needed "${pkgs_basic[@]}"
 
     log "Configuring git..."
     git config --global user.name "$username"
@@ -63,9 +66,10 @@ basic() {
 
     log "Installing yay..."
     git clone --quiet https://aur.archlinux.org/yay.git "$yay_dir"
-    pushd "$yay_dir" > /dev/null
-    makepkg --syncdeps --install --needed --clean --noconfirm > /dev/null
-    popd > /dev/null
+    (
+        cd "$yay_dir"
+        makepkg -si --needed --clean --noconfirm 
+    )
 
     log "Installing dotfiles from $dotfiles_repo..."
     git init --quiet --bare "$dotfiles_dir"
