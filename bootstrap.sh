@@ -29,7 +29,7 @@ readonly email="lucacotti@outlook.com"
 readonly dotfiles_repo="https://github.com/LucaCtt/dotfiles"
 readonly dotfiles_dir="$HOME/.dotfiles/"
 readonly pkgs_basic=(git vim zsh)
-readonly tmp="/tmp/bootstrap.$RANDOM.$RANDOM.$RANDOM.$$"
+readonly tmp=$(mktemp -d -t "/tmp/bootstrap.XXXXXXXXXX")
 readonly installation_type="$1"
 
 cleanup() {
@@ -85,9 +85,10 @@ then
     err "Please install sudo before running this script. Do NOT run the script itself as root/sudo."
 fi
 
-(umask 077 && mkdir "$tmp") || {
+if [ ! -d $tmp ]
+then
   err "Could not create temporary directory."
-}
+fi
 
 case "$installation_type" in
 "basic")
