@@ -29,7 +29,7 @@ readonly email="lucacotti@outlook.com"
 readonly dotfiles_repo="https://github.com/LucaCtt/dotfiles"
 readonly dotfiles_dir="$HOME/.dotfiles/"
 readonly pkgs_basic=(git vim zsh)
-readonly tmp=$(mktemp -d -t -q "/tmp/bootstrap.XXXXXXXXXX")
+readonly tmp=$(mktemp -d -t -q "bootstrap.XXXXXXXXXX")
 readonly installation_type="$1"
 
 cleanup() {
@@ -55,7 +55,7 @@ dot() {
 basic() {
     local yay_dir="${tmp}/yay"
     log "Installing basic packages..."
-    sudo pacman --sync --refresh --sysupgrade --quiet --noconfirm --needed "${pkgs_basic[@]}"
+    sudo pacman --sync --refresh --sysupgrade --noconfirm --needed "${pkgs_basic[@]}" > /dev/null
 
     log "Configuring git..."
     git config --global user.name "$username"
