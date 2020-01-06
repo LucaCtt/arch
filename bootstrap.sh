@@ -59,7 +59,6 @@ dot() {
 
 # Removes temp directory.
 cleanup() {
-    log "Cleaning up..."
     if [ -d $tmp ]  
     then
         /bin/rm -rf "$tmp"
@@ -73,12 +72,7 @@ basic() {
     log "Installing basic packages..."
     sudo pacman -Syuq --noconfirm --needed "${pkgs_basic[@]}"
 
-    log "Configuring git..."
-    git config --global user.name "$username"
-    git config --global user.email "$email"
-
-    
-    if [ ! -x "$(command -v yay)"]
+    if [ ! -x "$(command -v yay)" ]
     then
         log "Installing yay..."
         git clone --quiet https://aur.archlinux.org/yay.git "$yay_dir"
@@ -92,8 +86,8 @@ basic() {
     git init --quiet --bare "$dotfiles_dir"
     dot config status.showUntrackedFiles no
     dot remote add origin "$dotfiles_repo"
-    dot update-index --assume-unchanged "${dotfiles_ignore[@]}"
     dot pull origin master
+    dot update-index --assume-unchanged "${dotfiles_ignore[@]}"
 }
 
 set -o errexit -o nounset -o noclobber -o pipefail
@@ -127,7 +121,6 @@ case "$installation_type" in
 ;;
 esac
 
-cleanup
 echo "Done."
 exit 0
 
