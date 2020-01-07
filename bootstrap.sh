@@ -7,8 +7,8 @@
 #   This script handles the installation of userspace packages
 #   and configuration on Arch Linux, according to the selected
 #   installation type.
-#   At the moment it does not install/config anything
-#   system related, such as drivers, partitions, users, groups, and so on.
+#   It does not setup anything system related,
+#   such as drivers, partitions, users, groups, and so on.
 #
 #   To run, this script requires an Internet connection and sudo
 #   to be installed. Also, the current user must NOT be root.
@@ -17,6 +17,7 @@
 #
 # INSTALLATION TYPES
 #   - basic: just a few basic tools. No DE/WM.
+#   - gnome: basic + gnome + gnome applications
 #
 # AUTHOR
 #   Luca Cotti <lucacotti@outlook.com>
@@ -24,12 +25,11 @@
 # LICENSE
 #   MIT license.
 
-readonly username="Luca Cotti"
-readonly email="lucacotti@outlook.com"
 readonly dotfiles_repo="https://github.com/LucaCtt/dotfiles"
 readonly dotfiles_dir="${HOME}/.dotfiles/"
 readonly dotfiles_ignore=("${HOME}/README.md" "${HOME}/LICENSE")
 readonly pkgs_basic=(git vim zsh)
+readonly pkgs_gnome=(gnome gnome-extra)
 readonly tmp=$(mktemp -d -t -q "bootstrap.XXXXXXXXXX")
 readonly installation_type="$1"
 
@@ -39,16 +39,16 @@ readonly color_nc='\033[0m'
 
 # Logs the arguments to stdout, using some formatting.
 # ARGS:
-#   $@: The values to log.
+#   $*: The values to log.
 log() {
-    echo -e "${color_light_blue}> ${@}${color_nc}"
+    echo -e "${color_light_blue}> ${*}${color_nc}"
 }
 
 # Logs the arguments to stderr with some formatting, then exits with a non-zero code.
 # ARGS:
-#   $#: The values to log.
+#   $*: The values to log.
 err() {
-    echo -e "${color_red}${@}${color_nc}" >&2
+    echo -e "${color_red}${*}${color_nc}" >&2
     exit 1
 }
 
@@ -59,7 +59,7 @@ dot() {
 
 # Removes temp directory.
 cleanup() {
-    if [ -d $tmp ]  
+    if [ -d "$tmp" ]  
     then
         /bin/rm -rf "$tmp"
     fi
@@ -90,6 +90,13 @@ basic() {
     dot update-index --assume-unchanged "${dotfiles_ignore[@]}"
 }
 
+# Executes gnome installation
+gnome() {
+    log "Installing gnome..."
+    sudo pacman -Syuq --noconfirm --needed "${pkgs_gnome[@]}"
+    sudo systemctl enable gdm
+}
+
 set -o errexit -o nounset -o noclobber -o pipefail
 shopt -s nullglob
 trap "cleanup; exit" EXIT INT TERM
@@ -104,7 +111,7 @@ then
     err "Please install sudo before running this script. Do NOT run the script itself as root/sudo."
 fi
 
-if [ ! -d $tmp ]
+if [ ! -d "$tmp" ]
 then
     err "Could not create temporary directory."
 fi
@@ -112,6 +119,10 @@ fi
 case "$installation_type" in
 "basic")
     basic
+;;
+"gnome")
+    basic
+    gnome
 ;;
 "")
     err "Please specify the installation type."
@@ -121,6 +132,6 @@ case "$installation_type" in
 ;;
 esac
 
-echo "Done."
+log "Done."
 exit 0
 
