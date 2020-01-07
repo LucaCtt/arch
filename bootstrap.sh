@@ -29,7 +29,7 @@ readonly dotfiles_repo="https://github.com/LucaCtt/dotfiles"
 readonly dotfiles_dir="${HOME}/.dotfiles/"
 readonly dotfiles_ignore=("${HOME}/README.md" "${HOME}/LICENSE")
 readonly pkgs_basic=(git vim zsh)
-readonly pkgs_gnome=(gnome gnome-extra)
+readonly pkgs_gnome=(gnome gnome-extra code gvim)
 readonly tmp=$(mktemp -d -t -q "bootstrap.XXXXXXXXXX")
 readonly installation_type="$1"
 
